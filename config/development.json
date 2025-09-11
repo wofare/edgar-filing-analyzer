@@ -1,0 +1,98 @@
+{
+  "environment": "development",
+  "app": {
+    "name": "WhatChanged Development",
+    "version": "1.0.0",
+    "debug": true,
+    "hotReload": true
+  },
+  "server": {
+    "host": "localhost",
+    "port": 3000,
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+      "credentials": true
+    }
+  },
+  "database": {
+    "maxConnections": 10,
+    "timeout": 5000,
+    "logging": true,
+    "migrations": {
+      "autoRun": true
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "provider": "memory",
+    "ttl": {
+      "short": 300,
+      "medium": 1800,
+      "long": 3600
+    }
+  },
+  "jobs": {
+    "enabled": true,
+    "concurrency": 2,
+    "maxRetries": 3,
+    "retryDelay": 1000,
+    "cleanupInterval": 300000
+  },
+  "monitoring": {
+    "enabled": true,
+    "level": "debug",
+    "console": true,
+    "file": false,
+    "sentry": false,
+    "datadog": false
+  },
+  "security": {
+    "rateLimiting": {
+      "enabled": true,
+      "strict": false,
+      "windowMs": 900000,
+      "maxRequests": 1000
+    },
+    "csrf": {
+      "enabled": false
+    },
+    "helmet": {
+      "enabled": true,
+      "contentSecurityPolicy": false
+    }
+  },
+  "features": {
+    "aiAnalysis": true,
+    "realTimeAlerts": true,
+    "advancedAnalytics": true,
+    "apiAccess": true,
+    "debugMode": true
+  },
+  "external": {
+    "sec": {
+      "baseUrl": "https://www.sec.gov/Archives/edgar",
+      "rateLimit": 100,
+      "timeout": 10000
+    },
+    "openai": {
+      "model": "gpt-3.5-turbo",
+      "maxTokens": 2000,
+      "temperature": 0.1
+    },
+    "stripe": {
+      "mode": "test",
+      "webhookTolerance": 300
+    }
+  },
+  "email": {
+    "provider": "console",
+    "templates": {
+      "baseUrl": "http://localhost:3000"
+    }
+  },
+  "sms": {
+    "provider": "console",
+    "enabled": false
+  }
+}

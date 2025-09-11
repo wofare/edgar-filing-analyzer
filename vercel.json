@@ -1,0 +1,167 @@
+{
+  "version": 2,
+  "name": "whatchanged",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
+  "functions": {
+    "pages/api/**/*.js": {
+      "maxDuration": 60
+    },
+    "pages/api/webhook/**/*.js": {
+      "maxDuration": 30
+    },
+    "pages/api/cron/**/*.js": {
+      "maxDuration": 300
+    }
+  },
+  "regions": ["iad1"],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health"
+    },
+    {
+      "src": "/api/webhook/(.*)",
+      "dest": "/api/webhook/$1"
+    },
+    {
+      "src": "/api/cron/(.*)",
+      "dest": "/api/cron/$1"
+    },
+    {
+      "src": "/sitemap.xml",
+      "dest": "/api/sitemap"
+    },
+    {
+      "src": "/robots.txt",
+      "dest": "/api/robots"
+    },
+    {
+      "src": "/s/(.*)",
+      "dest": "/stock/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://whatchanged.app"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=self, microphone=self, geolocation=self"
+        }
+      ]
+    },
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/edgar-polling",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/price-updates",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/alert-processing",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/data-cleanup",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "/api/docs"
+    },
+    {
+      "source": "/docs/(.*)",
+      "destination": "/api/docs/$1"
+    }
+  ]
+}

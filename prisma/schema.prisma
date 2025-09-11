@@ -1,0 +1,312 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  phone       String?
+  emailVerified Boolean @default(false)
+  phoneVerified Boolean @default(false)
+  
+  // Alert Settings
+  emailEnabled          Boolean @default(true)
+  smsEnabled           Boolean @default(false)
+  pushEnabled          Boolean @default(false)
+  materialityThreshold Float   @default(0.7)
+  formTypes            String[] @default(["10-K", "10-Q", "8-K"])
+  
+  // Subscription
+  stripeCustomerId     String?
+  subscriptionStatus   SubscriptionStatus @default(FREE)
+  subscriptionTier     String?
+  subscriptionEndsAt   DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  watchlists Watchlist[]
+  alerts     Alert[]
+  userWatchlistSettings UserWatchlistSettings[]
+
+  // Performance indexes
+  @@index([subscriptionStatus, subscriptionEndsAt])
+  @@index([emailEnabled, smsEnabled, pushEnabled])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  symbol    String   @unique
+  name      String
+  cik       String   @unique
+  industry  String?
+  sector    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  watchlists WatchlistCompany[]
+  filings    Filing[]
+
+  // Performance indexes for common queries
+  @@index([sector, industry])
+  @@index([name])  // For search functionality
+  @@index([createdAt])
+  @@map("companies")
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companies WatchlistCompany[]
+
+  @@index([userId, createdAt])
+  @@map("watchlists")
+}
+
+model WatchlistCompany {
+  watchlistId String
+  companyId   String
+  addedAt     DateTime @default(now())
+
+  // Relations
+  watchlist Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([watchlistId, companyId])
+  @@index([companyId, addedAt])  // For company-based queries
+  @@index([addedAt])  // For recent additions
+  @@map("watchlist_companies")
+}
+
+model Filing {
+  id          String   @id @default(cuid())
+  accessionNo String   @unique
+  companyId   String
+  formType    String
+  filedDate   DateTime
+  reportDate  DateTime?
+  description String?
+  documentUrl String
+  rawData     Json?
+  processed   Boolean  @default(false)
+  processingStartedAt DateTime?
+  processingCompletedAt DateTime?
+  
+  // Summary fields for API responses
+  summary     String?
+  keyHighlights String[]
+  overallImpact String?
+  totalChanges  Int @default(0)
+  materialChanges Int @default(0)
+  
+  // Processing metadata
+  jobId       String?
+  errorMessage String?
+  retryCount  Int @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  diffs   Diff[]
+  alerts  Alert[]
+  materialityTags MaterialityTag[]
+
+  // Performance indexes for common query patterns
+  @@index([companyId, filedDate(sort: Desc)])  // Company filings ordered by date
+  @@index([formType, filedDate(sort: Desc)])   // Form type queries
+  @@index([processed, createdAt])              // Processing queue queries
+  @@index([filedDate(sort: Desc), processed]) // Recent filings dashboard
+  @@index([companyId, formType, filedDate])   // Compound queries
+  @@index([materialChanges, filedDate])       // Material changes filter
+  @@index([totalChanges])                     // Changes sorting
+  @@index([jobId])                           // Job tracking
+  @@fulltext([summary, keyHighlights])       // Full-text search on summaries
+  @@map("filings")
+}
+
+model Diff {
+  id               String   @id @default(cuid())
+  filingId         String
+  sectionType      String
+  changeType       String
+  oldContent       String?
+  newContent       String?
+  summary          String?
+  impact           String?
+  materialityScore Float?
+  
+  // Position in filing for ordering
+  sectionOrder     Int?
+  lineStart        Int?
+  lineEnd          Int?
+  
+  createdAt        DateTime @default(now())
+
+  // Relations
+  filing Filing @relation(fields: [filingId], references: [id], onDelete: Cascade)
+  materialityTags MaterialityTag[]
+
+  // Performance indexes for diff queries
+  @@index([filingId, materialityScore(sort: Desc)])  // Material diff queries
+  @@index([filingId, sectionOrder])                  // Ordered diffs
+  @@index([sectionType, changeType])                 // Type-based filters
+  @@index([materialityScore(sort: Desc)])            // Top material changes
+  @@index([changeType, materialityScore])            // Change analysis
+  @@index([createdAt])                               // Recent diffs
+  @@fulltext([summary, impact])                      // Search diff summaries
+  @@map("diffs")
+}
+
+model Alert {
+  id        String      @id @default(cuid())
+  userId    String
+  filingId  String
+  type      AlertType
+  method    AlertMethod
+  title     String
+  message   String
+  sentAt    DateTime?
+  status    AlertStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filing Filing @relation(fields: [filingId], references: [id], onDelete: Cascade)
+
+  // Indexes for alert processing and user queries
+  @@index([userId, createdAt(sort: Desc)])     // User's alerts
+  @@index([status, createdAt])                 // Alert processing queue
+  @@index([type, status])                      // Alert type filtering
+  @@index([sentAt])                           // Sent alert tracking
+  @@index([filingId, type])                   // Filing-based alerts
+  @@index([method, status])                   // Method-specific processing
+  @@map("alerts")
+}
+
+enum AlertType {
+  MATERIAL_CHANGE
+  NEW_FILING
+  EARNINGS_UPDATE
+  GUIDANCE_CHANGE
+}
+
+enum AlertMethod {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum AlertStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+model UserWatchlistSettings {
+  id        String   @id @default(cuid())
+  userId    String
+  ticker    String
+  alertTypes AlertType[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ticker])
+  @@map("user_watchlist_settings")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  type        JobType
+  status      JobStatus @default(QUEUED)
+  payload     Json
+  result      Json?
+  error       String?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  startedAt   DateTime?
+  completedAt DateTime?
+  nextRetryAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, nextRetryAt])
+  @@index([type, status])
+  @@map("jobs")
+}
+
+enum JobType {
+  FILING_INGESTION
+  ALERT_DISPATCH
+  PRICE_UPDATE
+  DIFF_GENERATION
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model MaterialityTag {
+  id          String @id @default(cuid())
+  type        String
+  label       String
+  severity    MaterialitySeverity
+  description String?
+  filingId    String
+  diffId      String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  filing Filing @relation(fields: [filingId], references: [id], onDelete: Cascade)
+  diff   Diff?  @relation(fields: [diffId], references: [id], onDelete: Cascade)
+
+  @@index([filingId, severity])
+  @@map("materiality_tags")
+}
+
+enum MaterialitySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

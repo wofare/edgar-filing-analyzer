@@ -1,0 +1,119 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+/coverage
+/test-results
+/playwright-report
+/test-results/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Production builds
+/build
+/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Database
+/prisma/dev.db*
+/prisma/test.db*
+*.db
+*.db-journal
+dev.db*
+test.db*
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+.logs
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+*.tsbuildinfo
+.cache/
+
+# Vercel
+.vercel
+
+# Sentry
+.sentryclirc
+
+# Monitoring and analytics
+.datadog/
+
+# File uploads
+uploads/
+temp/
+
+# Generated documentation
+/docs/generated/
+/api-docs/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.backup
+*.bak
+
+# Lock files (keep package-lock.json but ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Local development overrides
+docker-compose.local.yml

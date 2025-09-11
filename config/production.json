@@ -1,0 +1,158 @@
+{
+  "environment": "production",
+  "app": {
+    "name": "WhatChanged",
+    "version": "1.0.0",
+    "debug": false,
+    "hotReload": false
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 3000,
+    "cors": {
+      "enabled": true,
+      "origins": ["https://whatchanged.app", "https://www.whatchanged.app"],
+      "credentials": true
+    }
+  },
+  "database": {
+    "maxConnections": 20,
+    "timeout": 30000,
+    "logging": false,
+    "migrations": {
+      "autoRun": false
+    },
+    "ssl": true,
+    "pool": {
+      "min": 5,
+      "max": 20,
+      "acquireTimeoutMillis": 30000,
+      "idleTimeoutMillis": 300000
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "provider": "redis",
+    "ttl": {
+      "short": 300,
+      "medium": 1800,
+      "long": 3600
+    },
+    "compression": true
+  },
+  "jobs": {
+    "enabled": true,
+    "concurrency": 5,
+    "maxRetries": 3,
+    "retryDelay": 2000,
+    "cleanupInterval": 900000,
+    "healthCheck": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "level": "info",
+    "console": false,
+    "file": true,
+    "sentry": true,
+    "datadog": true,
+    "metrics": {
+      "enabled": true,
+      "interval": 60000
+    }
+  },
+  "security": {
+    "rateLimiting": {
+      "enabled": true,
+      "strict": true,
+      "windowMs": 900000,
+      "maxRequests": 100
+    },
+    "csrf": {
+      "enabled": true
+    },
+    "helmet": {
+      "enabled": true,
+      "contentSecurityPolicy": true,
+      "hsts": true
+    },
+    "ipWhitelist": {
+      "enabled": false,
+      "ips": []
+    }
+  },
+  "features": {
+    "aiAnalysis": true,
+    "realTimeAlerts": true,
+    "advancedAnalytics": true,
+    "apiAccess": true,
+    "debugMode": false
+  },
+  "external": {
+    "sec": {
+      "baseUrl": "https://www.sec.gov/Archives/edgar",
+      "rateLimit": 100,
+      "timeout": 15000,
+      "retries": 3
+    },
+    "openai": {
+      "model": "gpt-4",
+      "maxTokens": 2000,
+      "temperature": 0.1,
+      "timeout": 30000
+    },
+    "stripe": {
+      "mode": "live",
+      "webhookTolerance": 300
+    }
+  },
+  "email": {
+    "provider": "sendgrid",
+    "templates": {
+      "baseUrl": "https://whatchanged.app"
+    },
+    "bounce": {
+      "enabled": true
+    },
+    "unsubscribe": {
+      "enabled": true
+    }
+  },
+  "sms": {
+    "provider": "twilio",
+    "enabled": true,
+    "deliveryTracking": true
+  },
+  "performance": {
+    "compression": {
+      "enabled": true,
+      "level": 6
+    },
+    "staticAssets": {
+      "maxAge": 31536000,
+      "immutable": true
+    },
+    "preload": {
+      "enabled": true
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": 30,
+    "s3": {
+      "bucket": "whatchanged-backups",
+      "encryption": true
+    }
+  },
+  "alerts": {
+    "system": {
+      "enabled": true,
+      "channels": ["email", "slack"],
+      "thresholds": {
+        "errorRate": 0.01,
+        "responseTime": 2000,
+        "memoryUsage": 0.8
+      }
+    }
+  }
+}

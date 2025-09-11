@@ -1,0 +1,166 @@
+{
+  "environment": "staging",
+  "app": {
+    "name": "WhatChanged Staging",
+    "version": "1.0.0",
+    "debug": true,
+    "hotReload": false
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 3000,
+    "cors": {
+      "enabled": true,
+      "origins": ["https://staging.whatchanged.app", "https://whatchanged-staging.vercel.app"],
+      "credentials": true
+    }
+  },
+  "database": {
+    "maxConnections": 15,
+    "timeout": 15000,
+    "logging": true,
+    "migrations": {
+      "autoRun": true
+    },
+    "ssl": true,
+    "pool": {
+      "min": 2,
+      "max": 15,
+      "acquireTimeoutMillis": 15000,
+      "idleTimeoutMillis": 300000
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "provider": "redis",
+    "ttl": {
+      "short": 300,
+      "medium": 1800,
+      "long": 3600
+    },
+    "compression": false
+  },
+  "jobs": {
+    "enabled": true,
+    "concurrency": 3,
+    "maxRetries": 3,
+    "retryDelay": 1500,
+    "cleanupInterval": 600000,
+    "healthCheck": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "level": "debug",
+    "console": true,
+    "file": true,
+    "sentry": true,
+    "datadog": false,
+    "metrics": {
+      "enabled": true,
+      "interval": 30000
+    }
+  },
+  "security": {
+    "rateLimiting": {
+      "enabled": true,
+      "strict": false,
+      "windowMs": 900000,
+      "maxRequests": 500
+    },
+    "csrf": {
+      "enabled": true
+    },
+    "helmet": {
+      "enabled": true,
+      "contentSecurityPolicy": true,
+      "hsts": false
+    },
+    "ipWhitelist": {
+      "enabled": false,
+      "ips": []
+    }
+  },
+  "features": {
+    "aiAnalysis": true,
+    "realTimeAlerts": true,
+    "advancedAnalytics": true,
+    "apiAccess": true,
+    "debugMode": true
+  },
+  "external": {
+    "sec": {
+      "baseUrl": "https://www.sec.gov/Archives/edgar",
+      "rateLimit": 100,
+      "timeout": 12000,
+      "retries": 2
+    },
+    "openai": {
+      "model": "gpt-3.5-turbo",
+      "maxTokens": 2000,
+      "temperature": 0.1,
+      "timeout": 20000
+    },
+    "stripe": {
+      "mode": "test",
+      "webhookTolerance": 300
+    }
+  },
+  "email": {
+    "provider": "sendgrid",
+    "templates": {
+      "baseUrl": "https://staging.whatchanged.app"
+    },
+    "bounce": {
+      "enabled": false
+    },
+    "unsubscribe": {
+      "enabled": true
+    }
+  },
+  "sms": {
+    "provider": "twilio",
+    "enabled": true,
+    "deliveryTracking": true
+  },
+  "performance": {
+    "compression": {
+      "enabled": true,
+      "level": 4
+    },
+    "staticAssets": {
+      "maxAge": 86400,
+      "immutable": false
+    },
+    "preload": {
+      "enabled": false
+    }
+  },
+  "backup": {
+    "enabled": false,
+    "schedule": "0 3 * * *",
+    "retention": 7
+  },
+  "alerts": {
+    "system": {
+      "enabled": true,
+      "channels": ["email"],
+      "thresholds": {
+        "errorRate": 0.05,
+        "responseTime": 5000,
+        "memoryUsage": 0.9
+      }
+    }
+  },
+  "testing": {
+    "enabled": true,
+    "fixtures": {
+      "enabled": true,
+      "autoLoad": true
+    },
+    "mockServices": {
+      "stripe": false,
+      "twilio": false,
+      "sendgrid": false
+    }
+  }
+}
