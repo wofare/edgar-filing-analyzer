@@ -144,7 +144,6 @@ model Filing {
   @@index([materialChanges, filedDate])       // Material changes filter
   @@index([totalChanges])                     // Changes sorting
   @@index([jobId])                           // Job tracking
-  @@fulltext([summary, keyHighlights])       // Full-text search on summaries
   @@map("filings")
 }
 
@@ -177,7 +176,6 @@ model Diff {
   @@index([materialityScore(sort: Desc)])            // Top material changes
   @@index([changeType, materialityScore])            // Change analysis
   @@index([createdAt])                               // Recent diffs
-  @@fulltext([summary, impact])                      // Search diff summaries
   @@map("diffs")
 }
 
