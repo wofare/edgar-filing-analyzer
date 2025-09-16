@@ -442,5 +442,13 @@ export class InvalidCikError extends EdgarClientError {
   }
 }
 
+export function createEDGARClient(options?: {
+  userAgent?: string
+  requestsPerSecond?: number
+  timeout?: number
+}): EdgarClient {
+  return new EdgarClient(options)
+}
+
 // Default export
 export default EdgarClient

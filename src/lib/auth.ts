@@ -7,12 +7,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { UserModel } from "@/models/user"
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+const authHandler = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
@@ -238,6 +233,10 @@ export const {
 
   debug: process.env.NODE_ENV === "development",
 })
+
+export const handlers = authHandler.handlers
+export const { GET, POST } = handlers
+export const { auth, signIn, signOut } = authHandler
 
 // Helper functions for server-side auth checks
 export async function getCurrentUser() {
