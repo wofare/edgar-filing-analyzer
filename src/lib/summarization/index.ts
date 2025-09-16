@@ -503,4 +503,8 @@ export class InvalidResponseError extends SummarizationError {
   }
 }
 
+export function createSummarizationService(config?: SummarizationConfig): SummarizationService {
+  return new SummarizationService(config)
+}
+
 export default SummarizationService

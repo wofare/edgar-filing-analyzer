@@ -649,4 +649,8 @@ export class SectionExtractionError extends DiffEngineError {
   }
 }
 
+export function createDiffEngine(): DiffEngine {
+  return new DiffEngine()
+}
+
 export default DiffEngine
