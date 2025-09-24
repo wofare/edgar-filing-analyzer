@@ -2,6 +2,9 @@
 
 # Dependencies
 /node_modules
+/fromScratch/node_modules
+/fromScratch/.next
+/fromScratch/tsconfig.tsbuildinfo
 /.pnp
 .pnp.js
 .yarn/install-state.gz
